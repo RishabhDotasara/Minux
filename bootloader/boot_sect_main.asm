@@ -21,18 +21,24 @@ start:
     mov bx, HELO_WORLD ; 
     call print_string 
     call print_nl
-    mov bx, R2P_Transition 
-    call print_string
-
+    call switch_to_pm
+    
+[bits 32]
+start_protected_code: 
+    mov ebx, R2P_Transition
+    call print_string_pm
 
 jmp $ ; the reason to use this infinite loop here actually quite funny, see if you dont put it, assembly nature to execute the instructions line by line will execute those functions once again, so either have some instruction to halt the CPU there or for now simply just run this infinite loop 
 
+[bits 16]
 ; include all the files 
 %include "boot_sect_print_str.asm"
 %include "boot_sect_print_hex.asm"
 %include "boot_sect_print_nl.asm"
 %include "boot_sect_disk.asm"
-
+%include "boot_sect_gdt.asm"
+%include "boot_sect_print_32bit.asm"
+%include "boot_sect_r2p.asm"
 HELO_WORLD: 
     db 'Bootsector Loaded Sucessfully!',0
 
