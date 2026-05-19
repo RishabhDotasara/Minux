@@ -18,17 +18,10 @@ sti ; enable interrupts after stack is setup
 start: 
     mov [BOOT_DRIVE], dl ; save the boot drive number provided by BIOS
 
-    mov bx, HELO_WORLD 
-    call print_string
+    mov bx, HELO_WORLD ; 
+    call print_string 
     call print_nl
-
-    ; read from the disk 
-    mov bx, 0x9000 ; the address where the read data will be stored by the disk call function 
-    mov dh, 0x01 ; number of sectors to read
-    mov dl, [BOOT_DRIVE]
-    call disk_load 
-
-    mov bx, 0x9000 ; Ensure bx points to the data we just read
+    mov bx, R2P_Transition 
     call print_string
 
 
@@ -41,10 +34,10 @@ jmp $ ; the reason to use this infinite loop here actually quite funny, see if y
 %include "boot_sect_disk.asm"
 
 HELO_WORLD: 
-    db 'Hello World!',0
+    db 'Bootsector Loaded Sucessfully!',0
 
-GOODBYE_WORLD:
-    db 'Successfully read from sector 2!', 0
+R2P_Transition: 
+    db 'Transitioning to Protected Mode...',0
 
 BOOT_DRIVE: 
     db 0
@@ -54,11 +47,3 @@ times 510-($-$$) db 0 ; this for now to fill the remaining space from the 512 by
 ; now place the signature bytes in the file 
 db 0x55; this marks this as a bootable bootsector 
 db 0xAA
-
-; This data starts in Sector 2 (at offset 512 from start of file)
-DATA_FROM_DISK:
-    db 'Successfully read from sector 2!', 0
-
-times 512 - ($ - DATA_FROM_DISK) db 0 ; fill rest of sector 2
-times 512 db 0 ; sector 3
- 
