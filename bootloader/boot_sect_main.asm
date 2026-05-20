@@ -28,6 +28,10 @@ start:
     ; before switching to protected mode, we wil load the kernel, and then switch to the 32 bit mode execute its instructions, as compilers spit out 32 bit instructions, to know more, read the book again that we concatenate the boot sector and kernel code into a kernel image, so it is easier for us to load the kernel
     call load_kernel
     
+    mov bx, R2P_Transition
+    call print_string
+    call print_nl 
+    
     call switch_to_pm ; jumps to a label init_pm in the boot_sect_r2p.asm file, where we will switch to protected mode and then execute the kernel code there
     
 [bits 32]
@@ -71,6 +75,10 @@ load_kernel:
     mov dl, [BOOT_DRIVE] 
     call disk_load 
 
+    mov bx, MSG_LOAD_KERNEL_SUCCESS
+    call print_string
+    call print_nl
+
     ret
 
 
@@ -80,6 +88,9 @@ HELO_WORLD:
 
 MSG_LOAD_KERNEL: 
     db 'Loading Kernel...',0
+
+MSG_LOAD_KERNEL_SUCCESS:
+    db 'Kernel Loaded Successfully!',0
 
 
 BOOT_DRIVE: 
