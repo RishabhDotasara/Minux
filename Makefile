@@ -2,13 +2,17 @@
 # Source files
 KERNEL_CSOURCES := $(wildcard ./kernel/*.c)
 DRIVER_CSOURCES := $(wildcard ./drivers/*.c)
+CPU_CSOURCES := $(wildcard ./cpu/*.c)
+LIBC_CSOURCES := $(wildcard ./libc/*.c)
 
 # Object files
 KERNEL_COBJS := $(patsubst ./kernel/%.c,./objs/%.o,$(KERNEL_CSOURCES))
 DRIVER_COBJS := $(patsubst ./drivers/%.c,./objs/%.o,$(DRIVER_CSOURCES))
+CPU_COBJS := $(patsubst ./cpu/%.c,./objs/%.o,$(CPU_CSOURCES))
+LIBC_COBJS := $(patsubst ./libc/%.c,./objs/%.o,$(LIBC_CSOURCES))
 
 # Final object list
-OBJS := ./objs/kernel_entry.o $(KERNEL_COBJS) $(DRIVER_COBJS)
+OBJS := ./objs/kernel_entry.o ./objs/interrupt.o $(KERNEL_COBJS) $(DRIVER_COBJS) $(CPU_COBJS) $(LIBC_COBJS)
 
 
 all: os-image
@@ -25,6 +29,9 @@ kernel.bin: $(OBJS)
 ./objs/kernel_entry.o: ./kernel/kernel_entry.asm
 	mkdir -p objs
 	nasm -f elf32 ./kernel/kernel_entry.asm -o ./objs/kernel_entry.o
+./objs/interrupt.o: ./cpu/interrupt.asm
+	mkdir -p objs
+	nasm -f elf32 ./cpu/interrupt.asm -o ./objs/interrupt.o
 
 
 ./objs/%.o: ./kernel/%.c
@@ -34,6 +41,15 @@ kernel.bin: $(OBJS)
 ./objs/%.o: ./drivers/%.c
 	mkdir -p objs
 	gcc -m32 -ffreestanding -fno-pie -fno-pic -c $< -o $@
+
+./objs/%.o: ./cpu/%.c
+	mkdir -p objs
+	gcc -m32 -ffreestanding -fno-pie -fno-pic -c $< -o $@
+
+./objs/%.o: ./libc/%.c
+	mkdir -p objs
+	gcc -m32 -ffreestanding -fno-pie -fno-pic -c $< -o $@
+
 
 
 # Build bootloader

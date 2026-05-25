@@ -11,6 +11,7 @@
 
 
 void print_string(int row, int col, char* string, char attribute);
-void printf(char* string, char attribute);
+void kprint(char* string);
+void kprint_backspace();
 void clear_screen();
 

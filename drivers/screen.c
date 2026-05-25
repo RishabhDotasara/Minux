@@ -3,8 +3,7 @@
 // screen is a memory mapped IO, so it will be easy to  write the driver, first we will define the constants, all 
 
 #include "screen.h"
-#include "low_level.h"
-#include "../kernel/util.h"
+#include "../cpu/low_level.h"
 
 // private function declarations
 int get_screen_offset(int row, int col);
@@ -134,21 +133,39 @@ int get_offset_col(int offset){
 // public fucntion implementations
 void clear_screen()
 {
-    // pt empty space at all cells
+    // Write directly to video memory instead of calling print_char per cell,
+    // which would trigger 2000 cursor updates via port I/O and cause flickering.
+    unsigned char *video_address = (unsigned char *)VIDEO_ADDRESS;
     int total = MAX_ROWS * MAX_COLS;
     for (int i = 0; i < total; i++)
     {
-        print_char(i / MAX_COLS, i % MAX_COLS, ' ', WHITE_ON_BLACK);
+        video_address[i * 2] = ' ';
+        video_address[i * 2 + 1] = WHITE_ON_BLACK;
     }
-    set_cursor_offset(get_screen_offset(0,0));
+    set_cursor_offset(get_screen_offset(0, 0));
 }
 
-void printf(char *string, char attribute)
+void kprint(char *string)
 {
     int i = 0; 
     while (string[i] != '\0')
     {
-        print_char(-1, -1, string[i], attribute);
+        print_char(-1, -1, string[i], WHITE_ON_BLACK);
         i++;
     }
+}
+
+void kprint_backspace(){
+    int offset = get_cursor_offset() - 2; 
+    int row = get_offset_row(offset); 
+    int col = get_offset_col(offset); 
+
+    if (row <= 0 && col <= 0){
+        print_char(0, 0, ' ', WHITE_ON_BLACK);
+        set_cursor_offset(get_screen_offset(0, 0));
+        return;
+    }
+
+    print_char(row, col, ' ', WHITE_ON_BLACK);
+    set_cursor_offset(offset);
 }
