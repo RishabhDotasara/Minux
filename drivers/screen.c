@@ -10,7 +10,6 @@ int get_screen_offset(int row, int col);
 int get_cursor_offset();
 void set_cursor_offset(int offset);
 void print_char(int row, int col, char character, char attribute);
-void print_string(int row, int col, char* string, char attribute);
 int get_scroll_offset();
 int get_offset_row(int offset); 
 int get_offset_col(int offset);
@@ -109,17 +108,7 @@ void print_char(int row, int col, char character, char attribute)
     set_cursor_offset(offset);
 }
 
-void print_string(int row, int col, char *string, char attribute)
-{
-    if (row >= 0 && col >= 0)
-        set_cursor_offset(get_screen_offset(row, col));
-    int i = 0;
-    while (string[i] != '\0')
-    {
-        print_char(-1, -1, string[i], attribute);
-        i++;
-    }
-}
+
 
 int get_offset_row(int offset){
     return offset / (2 * MAX_COLS);
@@ -131,29 +120,9 @@ int get_offset_col(int offset){
 }
 
 // public fucntion implementations
-void clear_screen()
-{
-    // Write directly to video memory instead of calling print_char per cell,
-    // which would trigger 2000 cursor updates via port I/O and cause flickering.
-    unsigned char *video_address = (unsigned char *)VIDEO_ADDRESS;
-    int total = MAX_ROWS * MAX_COLS;
-    for (int i = 0; i < total; i++)
-    {
-        video_address[i * 2] = ' ';
-        video_address[i * 2 + 1] = WHITE_ON_BLACK;
-    }
-    set_cursor_offset(get_screen_offset(0, 0));
-}
 
-void kprint(char *string)
-{
-    int i = 0; 
-    while (string[i] != '\0')
-    {
-        print_char(-1, -1, string[i], WHITE_ON_BLACK);
-        i++;
-    }
-}
+
+
 
 void kprint_backspace(){
     int offset = get_cursor_offset() - 2; 

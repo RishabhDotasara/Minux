@@ -9,9 +9,5 @@
 #define REG_SCREEN_CTRL 0x3D4 
 #define REG_SCREEN_DATA 0x3D5 
 
-
-void print_string(int row, int col, char* string, char attribute);
-void kprint(char* string);
 void kprint_backspace();
-void clear_screen();
-
+void print_char(int row, int col, char character, char attribute);
