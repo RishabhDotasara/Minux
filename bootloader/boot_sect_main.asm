@@ -71,7 +71,7 @@ load_kernel:
     call print_nl 
 
     mov bx, KERNEL_OFFSET ; offset where we want to load the kernel 
-    mov dh, 32 ; kernel is ~8KB+, need enough sectors (32 * 512 = 16KB)
+    mov dh, 50 ; kernel is ~8KB+, need enough sectors (32 * 512 = 16KB)
     mov dl, [BOOT_DRIVE] 
     call disk_load 
 
