@@ -5,4 +5,6 @@ void init_tty();
 void clear_screen(); 
 void tty_putchar(char c);
 void tty_readline(char* buf, int max, int iflag);
-void tty_write(char* string);
+
+void tty_split(char **buf, char *src, char del);
+void tty_write(char *string);

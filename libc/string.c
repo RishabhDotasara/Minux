@@ -49,6 +49,17 @@ void append(char s[], char n)
     s[len + 1] = '\0';
 }
 
+int kstoi(char *str)
+{
+    int result = 0; 
+    int n = strlen(str);
+    for (int i = 0; i < n; i++){
+        result *= 10;
+        result += (str[i] - '0');
+    }
+    return result; 
+}
+
 void backspace(char s[])
 {
     int len = strlen(s);

@@ -1,7 +1,7 @@
 #include "../drivers/screen.h"
 #include "input.h"
-
-
+#include "../libc/mem.h"
+#include "../libc/string.h"
 
 
 void clear_screen()
@@ -63,6 +63,50 @@ tty_readline(char* buf, int max, int iflag){
     }
 
 
+}
+void tty_split(char **buf, char *src, char del)
+{
+    int i = 0;
+    int j = 0;
+
+    // Skip any leading delimiters
+    while (src[j] == del)
+    {
+        j++;
+    }
+
+    // Set first argument pointer
+    if (src[j] != '\0')
+    {
+        buf[i++] = &src[j];
+    }
+
+    while (src[j] != '\0')
+    {
+        if (src[j] == del)
+        {
+            src[j] = '\0'; // Replace delimiter with null-terminator
+            j++;
+
+            // Skip contiguous delimiters
+            while (src[j] == del)
+            {
+                j++;
+            }
+
+            // Set the next argument pointer
+            if (src[j] != '\0')
+            {
+                buf[i++] = &src[j];
+            }
+        }
+        else
+        {
+            j++;
+        }
+    }
+
+    buf[i] = 0; // Null-terminate the argument array
 }
 
 void init_tty()

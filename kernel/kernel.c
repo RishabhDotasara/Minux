@@ -6,6 +6,8 @@
 #include "../libc/string.h"
 #include "../libc/mem.h"
 
+#define MAX_ARGS 10 
+
 void welcome(){
     // ascii art
     char line1[] = "           _       _             ___  ____  \n";
@@ -28,10 +30,36 @@ void shell(){
         tty_write("root@minionOS>");
 
         tty_readline(line, sizeof(line), 1);
-
-        if (strcmp(line, "READ") == 0){
-            tty_write("Hello\n");
+        
+        char* args[MAX_ARGS]; 
+        // init all args as null or 0 for bool checks at least 
+        for (int i = 0; i < MAX_ARGS; i++){
+            *(args[i]) = "\0";
         }
+
+
+        tty_split(args, line, ' ');
+        
+        if (strcmp(args[0] ,"READ") == 0){
+            int LBA = kstoi(args[1]) ;
+            int nos = kstoi(args[2]) ; 
+
+            if (strcmp(args[1], "-H") == 0){
+                // print the help menu
+                tty_write("READ <LBA> <sector_count> - Read sectors from disk\n");
+                tty_write("  LBA: Logical Block Address (default: 100)\n");
+                tty_write("  sector_count: Number of sectors to read (default: 1)\n");
+                tty_write("  Example: READ 0 5\n");
+                tty_write("READ -H - Display this help menu\n");
+                continue;
+            }
+
+            // issue the read command 
+            char* bufff[512 * 5];
+            ata_read_sectors(LBA, nos, bufff);
+            tty_write(bufff);
+        }
+
     }
 }
 
