@@ -4,3 +4,4 @@
 void init_tty();
 void tty_write(char* s); 
 void tty_clear(); 
+void tty_readline(char* buf);

@@ -7,6 +7,7 @@
 #include <drivers/block/ata/ata.h>
 #include <lib/string.h>
 #include <lib/mem.h>
+#include <kernel/shell/shell.h>
 
 #define MAX_ARGS 10 
 
@@ -53,19 +54,17 @@ void main() {
     tty_write(" [OK] ATA Driver\n");
     tty_write("----------------------------------------\n");
 
-    tty_write("\n");
-    tty_write("\"Small kernel, large ambitions.\"\n");
-    tty_write("\n");
 
     tty_write("minux> ");
     // just take the input and put it to the screen 
     
     // read from the 100th sectro to check the subsystem is working or not 
-    char buff[512] = "Hello WOrld!, written by the kernel to disk! Can you believe it is working?\n";
-    block_write(100, 1, buff);
-    memory_set(buff, 0, 512); // reset to check if we read the data.
-    block_read(100, 1, buff);
-    tty_write(buff);
+    // char buff[512] = "Hello WOrld!, written by the kernel to disk! Can you believe it is working?\n";
+    // block_write(100, 1, buff);
+    // memory_set(buff, 0, 512); // reset to check if we read the data.
+    // block_read(100, 1, buff);
+    // tty_write(buff);
+    init_shell();
 
 
 }

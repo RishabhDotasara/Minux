@@ -3,6 +3,9 @@
 #include <arch/x86/cpu/types.h>
 #include <arch/x86/interrupts/isr.h>
 #include <subsystems/block/block.h>
+#include <kernel/log.h>
+
+#define ATA_LOG "[ATA]"
 
 
 block_device_ops_t ata_ops = {
@@ -37,7 +40,7 @@ int identify_drive(u32 base_port){
     u8 status_primary = port_byte_in(base_port + drive_offsets.status_register);
 
     if (status_primary == 0){
-        tty_write("[ATA-DISK-DRIVER] Primary Disk not FOUND!\n");
+        log_warn(ATA_LOG, "Drive not found on this port");
         return 0;
     }
 
@@ -59,7 +62,7 @@ int identify_drive(u32 base_port){
             for (int i = 0; i < 256; i++){
                 port_word_in(base_port);
             }   
-            tty_write("[ATA-DISK-DRIVER] Disk Identification Successfull!\n");
+            log_info(ATA_LOG, "Drive identified successfully");
             break; 
         }
     }
@@ -74,6 +77,7 @@ int ata_read_sectors(u32 LBA, u32 sector_count, char* buf){
 
     // check the sector_number for the max in 28 bit PIO 
     if (LBA > 0x0FFFFFFF) { 
+        log_error(ATA_LOG, "LBA out of range for 28-bit PIO");
         return 0;
     }
 
@@ -117,7 +121,7 @@ int ata_read_sectors(u32 LBA, u32 sector_count, char* buf){
 
             if (status_primary & ATA_SR_ERR)
             {
-                tty_write("[ATA-DISK-DRIVER] Error Reading data from disk!\n");
+                log_error(ATA_LOG, "Error reading sector from disk");
                 return 0;
             }
 
@@ -140,6 +144,7 @@ int ata_read_sectors(u32 LBA, u32 sector_count, char* buf){
 int ata_write_sectors(u32 lba,u32 count, const char* data){
     if (lba > 0x0FFFFFFF)
     {
+        log_error(ATA_LOG, "LBA out of range for 28-bit PIO");
         return 0;
     }
 
@@ -189,7 +194,7 @@ int ata_write_sectors(u32 lba,u32 count, const char* data){
 
             if (status_primary & ATA_SR_ERR)
             {
-                tty_write("[ATA-DISK-DRIVER] Error Reading data from disk!\n");
+                log_error(ATA_LOG, "Error writing sector to disk");
                 return 0;
             }
 
@@ -213,13 +218,15 @@ int ata_write_sectors(u32 lba,u32 count, const char* data){
 }
 
 void init_ata(){
+    log_info(ATA_LOG, "Initialising ATA driver");
     // first check both the drives on the bus 
     u8 primary_drive_status = identify_drive(PRIMARY_BASE_PORT); 
     u8 secondary_drive_status = identify_drive(SECONDARY_BASE_PORT); 
 
-// if (!primary_drive_status) tty_write("[ATA-DISK-DRIVER] Primary drive failed to identify!\n");
-// if (!secondary_drive_status) tty_write("[ATA-DISK-DRIVER] Secondary drive failed to identify!\n");
+    if (!primary_drive_status) log_warn(ATA_LOG, "Primary drive failed to identify");
+    if (!secondary_drive_status) log_warn(ATA_LOG, "Secondary drive failed to identify");
 
     // now you have both drives ready to read the data. 
     register_block(&ata_driver);
+    log_info(ATA_LOG, "ATA block device registered");
 }

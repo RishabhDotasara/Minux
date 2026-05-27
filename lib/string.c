@@ -66,6 +66,23 @@ void backspace(char s[])
     s[len - 1] = '\0';
 }
 
+void strsplit(char* str, char del){
+    int i = 0;
+    int j = 0;
+    char buffer[256];
+    
+    while (str[i] != '\0') {
+        if (str[i] == del) {
+            buffer[j] = '\0';
+            i++;
+            j = 0;
+        } else {
+            buffer[j++] = str[i++];
+        }
+    }
+    buffer[j] = '\0';
+}
+
 /* K&R
  * Returns <0 if s1<s2, 0 if s1==s2, >0 if s1>s2 */
 int strcmp(char s1[], char s2[])

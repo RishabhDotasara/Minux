@@ -1,4 +1,4 @@
-
+#pragma once
 
 void log_info(const char *module,
               const char *msg);

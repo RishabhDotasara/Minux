@@ -1,6 +1,9 @@
 #include "input.h"
 #include <arch/x86/cpu/types.h>
 #include <drivers/input/keyboard/keyboard.h>
+#include <kernel/log.h>
+
+#define INPUT_LOG "[INPUT]"
 
 #define INP_BUFF_SIZE 256
 
@@ -42,5 +45,7 @@ char* get_inp_buffer(){
 }
 
 void init_input(){
+    log_info(INPUT_LOG, "Initialising input subsystem");
     init_keyboard();
+    log_info(INPUT_LOG, "Input subsystem ready");
 }

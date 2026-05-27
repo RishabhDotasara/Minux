@@ -3,6 +3,9 @@
 #include <drivers/video/vga/vga.h>
 #include <lib/string.h>
 #include <subsystems/input/input.h>
+#include <kernel/log.h>
+
+#define KBD_LOG "[KBD]"
 
 #define ENTER 0x1c
 #define BACKSPACE 0x0E
@@ -102,4 +105,7 @@ static void keyboard_callback(registers_t regs)
   }
 }
 
-void init_keyboard() { register_interrupt_handler(IRQ1, keyboard_callback); }
+void init_keyboard() {
+    register_interrupt_handler(IRQ1, keyboard_callback);
+    log_info(KBD_LOG, "PS/2 keyboard driver initialised");
+}

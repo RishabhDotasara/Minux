@@ -1,9 +1,13 @@
 #include "console.h"
+#include <kernel/log.h>
+
+#define CONSOLE_LOG "[CONSOLE]"
 
 static console_device_t* active_console = 0; 
 
 void console_register(console_device_t* dev){
     active_console = dev; 
+    log_info(CONSOLE_LOG, "Console device registered");
 }
 
 console_device_t* console_get_active(){
