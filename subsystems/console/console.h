@@ -35,5 +35,6 @@ typedef struct console_device
 void console_register(console_device_t *dev);
 console_device_t *console_get_active();
 void console_putc(char c); 
+void console_write(char* s);
 void console_clear();
 void console_set_cursor(u32 x, u32 y);

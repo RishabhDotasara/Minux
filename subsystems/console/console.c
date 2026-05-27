@@ -16,7 +16,17 @@ void console_putc(char c){
     if (!active_console) return; 
 
     active_console->ops->putc(active_console, c);
+
 }
+
+void console_write(char* s){
+    int i = 0; 
+    while (s[i] != '\0'){
+        console_putc(s[i]);
+        i++;
+    }
+}
+
 
 void console_clear(){
     if (!active_console) return; 

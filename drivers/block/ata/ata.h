@@ -7,6 +7,8 @@
 #define ATA_SR_ERR 0x01 
 #define ATA_SR_BSY 0x80 
 #define ATA_SR_DRQ 0x08
+#define ATA_WRITE 0x30
+#define ATA_READ 0x20
 
 struct DRIVE_OFFSETS{
     u8 data_port; 
@@ -39,3 +41,4 @@ int identify_drive(); // this function to check if there are any disks connected
 void init_ata(); // main function where all the work of checking the drives will happen
 
 int ata_read_sectors(u32 LBA, u32 sector_count, char *buf);
+int ata_write_sectors(u32 lba, u32 count, const char *data);

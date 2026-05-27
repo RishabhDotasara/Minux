@@ -3,7 +3,7 @@ CFLAGS := -m32 -ffreestanding -fno-pie -fno-pic -I.
 
 # Source files
 KERNEL_CSOURCES := $(wildcard ./kernel/*.c)
-SUBSYSTEM_CSOURCES := $(wildcard ./subsystems/input/*.c) $(wildcard ./subsystems/tty/*.c) $(wildcard ./subsystems/console/*.c)
+SUBSYSTEM_CSOURCES := $(wildcard ./subsystems/input/*.c) $(wildcard ./subsystems/tty/*.c) $(wildcard ./subsystems/console/*.c) $(wildcard ./subsystems/block/*.c)
 DRIVER_CSOURCES := $(wildcard ./drivers/block/ata/*.c) $(wildcard ./drivers/input/keyboard/*.c) $(wildcard ./drivers/video/vga/*.c)
 ARCH_CSOURCES := $(wildcard ./arch/x86/cpu/*.c) $(wildcard ./arch/x86/interrupts/*.c) $(wildcard ./arch/x86/timer/*.c)
 LIB_CSOURCES := $(wildcard ./lib/*.c)
@@ -61,6 +61,10 @@ kernel.bin: $(OBJS)
 	gcc $(CFLAGS) -c $< -o $@
 
 ./build/%.o: ./subsystems/console/%.c
+	mkdir -p build
+	gcc $(CFLAGS) -c $< -o $@
+
+./build/%.o: ./subsystems/block/%.c
 	mkdir -p build
 	gcc $(CFLAGS) -c $< -o $@
 

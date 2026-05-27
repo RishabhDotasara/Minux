@@ -5,9 +5,7 @@
 #include "vga.h"
 #include <arch/x86/cpu/low_level.h>
 #include <subsystems/console/console.h>
-
-
-
+#include <kernel/log.h>
 
 // private function declarations
 int get_screen_offset(int row, int col);
@@ -163,6 +161,7 @@ struct console_device vga_device = {
 void init_vga()
 {
     console_register(&vga_device);
+    log_info("[VGA]", "VGA Initialised Successfully!\n");
 }
 
 // public fucntion implementations
