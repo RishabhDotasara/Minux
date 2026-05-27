@@ -1,5 +1,5 @@
 #pragma once 
-#include "types.h"
+#include <arch/x86/cpu/types.h>
 
 // these are the main 32 interrupts that the CPU needs, the CPU ones, so why extern? it is just like they exists somewhere xternally, those functions, those names, will be defined in the assembler, from there we will use the linker to replace those relative address, to absolute addresses, you can define the other 256-32 also, theses are just the required ones.
 extern void isr0();

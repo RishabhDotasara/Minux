@@ -1,5 +1,5 @@
 #include "isr.h"
-#include "../drivers/screen.h"
+#include <drivers/video/vga/vga.h>
 #include "idt.h"
 
 isr_t interrupt_handlers[256];

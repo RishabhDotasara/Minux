@@ -1,6 +1,6 @@
 #include "timer.h"
-#include "../drivers/screen.h"
-#include "isr.h"
+#include <drivers/video/vga/vga.h>
+#include <arch/x86/interrupts/isr.h>
 
 u32 tick = 0;
 

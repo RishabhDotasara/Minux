@@ -1,4 +1,4 @@
-#include "../cpu/types.h"
+#include <arch/x86/cpu/types.h>
 
 #define PRIMARY_BASE_PORT 0x1F0  
 #define SECONDARY_BASE_PORT 0x170 

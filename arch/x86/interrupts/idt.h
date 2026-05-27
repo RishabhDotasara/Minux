@@ -4,7 +4,7 @@
 // The IDT is basically an table that the CPU look when an interrupt happens as
 // in to what to do with that?
 #pragma once
-#include "types.h"
+#include <arch/x86/cpu/types.h>
 
 #define KERNEL_CS                                                              \
   0x08 // why defining segments again, we shiofted to flat memory model right?

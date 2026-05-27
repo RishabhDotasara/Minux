@@ -1,9 +1,8 @@
 #include "ata.h"
-#include "../cpu/low_level.h"
-#include "../cpu/types.h"
-#include "../kernel/tty.h"
-#include "../kernel/tty.h"
-#include "../cpu/isr.h"
+#include <arch/x86/cpu/low_level.h>
+#include <arch/x86/cpu/types.h>
+#include <subsystems/tty/tty.h>
+#include <arch/x86/interrupts/isr.h>
 
 
 int identify_drive(u32 base_port){

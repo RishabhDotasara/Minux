@@ -2,8 +2,12 @@
 
 // screen is a memory mapped IO, so it will be easy to  write the driver, first we will define the constants, all 
 
-#include "screen.h"
-#include "../cpu/low_level.h"
+#include "vga.h"
+#include <arch/x86/cpu/low_level.h>
+#include <subsystems/console/console.h>
+
+
+
 
 // private function declarations
 int get_screen_offset(int row, int col);
@@ -75,6 +79,10 @@ void print_char(int row, int col, char character, char attribute)
         offset = get_screen_offset(get_offset_row(offset) + 1, 0); // move to the next line
         // set_cursor_offset(offset)
     }
+    else if (character == '\b'){
+        kprint_backspace();
+        return;
+    }
     else
     {
         *(video_address + offset) = character;
@@ -108,8 +116,6 @@ void print_char(int row, int col, char character, char attribute)
     set_cursor_offset(offset);
 }
 
-
-
 int get_offset_row(int offset){
     return offset / (2 * MAX_COLS);
 }
@@ -119,11 +125,47 @@ int get_offset_col(int offset){
     return (offset - (row * MAX_COLS*2))/2 ;
 }
 
+
+// console functions implementation 
+void vga_putc(console_device_t* dev, char c){
+    print_char(-1, -1, c, WHITE_ON_BLACK);
+}
+
+void vga_clear(console_device_t* dev){
+    int total_cells = dev->height * dev->width; // total must be even
+    // set cursor to 0 
+    set_cursor_offset(get_screen_offset(0,0));
+    u16* screen = (u16*)VIDEO_ADDRESS;
+    for (int i = 0; i < total_cells/2; i++){
+        //  now just set all chars to " "
+        screen[i * 2] = ' ';
+        screen[i*2 + 1] = WHITE_ON_BLACK; 
+    }
+}
+
+void vga_set_cursor(console_device_t* dev, u32 x, u32 y){
+    set_cursor_offset(get_screen_offset(x, y)); 
+}
+
+// define the vga console ops respectively to be used by the console API
+static console_ops_t vga_ops = {
+    .putc = &vga_putc,
+    .clear = &vga_clear,
+    .set_cursor = &vga_set_cursor,
+};
+
+struct console_device vga_device = {
+    .name = "VGA Driver",
+    .width = 80,
+    .height = 25,
+    .ops = &vga_ops};
+
+void init_vga()
+{
+    console_register(&vga_device);
+}
+
 // public fucntion implementations
-
-
-
-
 void kprint_backspace(){
     int offset = get_cursor_offset() - 2; 
     int row = get_offset_row(offset); 

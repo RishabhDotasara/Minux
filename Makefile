@@ -1,17 +1,22 @@
+# Compiler flags
+CFLAGS := -m32 -ffreestanding -fno-pie -fno-pic -I.
+
 # Source files
 KERNEL_CSOURCES := $(wildcard ./kernel/*.c)
-DRIVER_CSOURCES := $(wildcard ./drivers/*.c)
-CPU_CSOURCES := $(wildcard ./cpu/*.c)
-LIBC_CSOURCES := $(wildcard ./libc/*.c)
+SUBSYSTEM_CSOURCES := $(wildcard ./subsystems/input/*.c) $(wildcard ./subsystems/tty/*.c) $(wildcard ./subsystems/console/*.c)
+DRIVER_CSOURCES := $(wildcard ./drivers/block/ata/*.c) $(wildcard ./drivers/input/keyboard/*.c) $(wildcard ./drivers/video/vga/*.c)
+ARCH_CSOURCES := $(wildcard ./arch/x86/cpu/*.c) $(wildcard ./arch/x86/interrupts/*.c) $(wildcard ./arch/x86/timer/*.c)
+LIB_CSOURCES := $(wildcard ./lib/*.c)
 
-# Object files
-KERNEL_COBJS := $(patsubst ./kernel/%.c,./objs/%.o,$(KERNEL_CSOURCES))
-DRIVER_COBJS := $(patsubst ./drivers/%.c,./objs/%.o,$(DRIVER_CSOURCES))
-CPU_COBJS := $(patsubst ./cpu/%.c,./objs/%.o,$(CPU_CSOURCES))
-LIBC_COBJS := $(patsubst ./libc/%.c,./objs/%.o,$(LIBC_CSOURCES))
+# Object files (flatten all into build/)
+KERNEL_COBJS := $(addprefix ./build/,$(notdir $(KERNEL_CSOURCES:.c=.o)))
+SUBSYSTEM_COBJS := $(addprefix ./build/,$(notdir $(SUBSYSTEM_CSOURCES:.c=.o)))
+DRIVER_COBJS := $(addprefix ./build/,$(notdir $(DRIVER_CSOURCES:.c=.o)))
+ARCH_COBJS := $(addprefix ./build/,$(notdir $(ARCH_CSOURCES:.c=.o)))
+LIB_COBJS := $(addprefix ./build/,$(notdir $(LIB_CSOURCES:.c=.o)))
 
 # Final object list
-OBJS := ./objs/kernel_entry.o ./objs/interrupt.o $(KERNEL_COBJS) $(DRIVER_COBJS) $(CPU_COBJS) $(LIBC_COBJS)
+OBJS := ./build/kernel_entry.o ./build/interrupt.o $(KERNEL_COBJS) $(SUBSYSTEM_COBJS) $(DRIVER_COBJS) $(ARCH_COBJS) $(LIB_COBJS)
 
 DISK_SECTORS := 2048
 KERNEL_SECTOR_OFFSET := 1
@@ -19,58 +24,91 @@ KERNEL_SECTOR_OFFSET := 1
 all: os-image
 
 os-image: kernel.bin boot_sect_main.bin
-	mkdir -p bin
-	dd if=/dev/zero of=./bin/os-image.bin bs=512 count=$(DISK_SECTORS)
-	dd if=./bootloader/boot_sect_main.bin \
-	   of=./bin/os-image.bin \
+	mkdir -p build
+	dd if=/dev/zero of=./build/os-image.bin bs=512 count=$(DISK_SECTORS)
+	dd if=./arch/x86/boot/boot_sect_main.bin \
+	   of=./build/os-image.bin \
 	   conv=notrunc
-	dd if=./bin/kernel.bin \
-	   of=./bin/os-image.bin \
+	dd if=./build/kernel.bin \
+	   of=./build/os-image.bin \
 	   bs=512 seek=$(KERNEL_SECTOR_OFFSET) conv=notrunc
 
 kernel.bin: $(OBJS)
-	mkdir -p bin
-	ld -m elf_i386 -o ./bin/kernel.bin -Ttext 0x1000 $(OBJS) --oformat binary
+	mkdir -p build
+	ld -m elf_i386 -o ./build/kernel.bin -Ttext 0x1000 $(OBJS) --oformat binary
 
 # Assemble kernel entry
-./objs/kernel_entry.o: ./kernel/kernel_entry.asm
-	mkdir -p objs
-	nasm -f elf32 ./kernel/kernel_entry.asm -o ./objs/kernel_entry.o
+./build/kernel_entry.o: ./kernel/kernel_entry.asm
+	mkdir -p build
+	nasm -f elf32 ./kernel/kernel_entry.asm -o ./build/kernel_entry.o
 
-./objs/interrupt.o: ./cpu/interrupt.asm
-	mkdir -p objs
-	nasm -f elf32 ./cpu/interrupt.asm -o ./objs/interrupt.o
+./build/interrupt.o: ./arch/x86/interrupts/interrupt.asm
+	mkdir -p build
+	nasm -f elf32 ./arch/x86/interrupts/interrupt.asm -o ./build/interrupt.o
 
-./objs/%.o: ./kernel/%.c
-	mkdir -p objs
-	gcc -m32 -ffreestanding -fno-pie -fno-pic -c $< -o $@
+# Kernel C files
+./build/%.o: ./kernel/%.c
+	mkdir -p build
+	gcc $(CFLAGS) -c $< -o $@
 
-./objs/%.o: ./drivers/%.c
-	mkdir -p objs
-	gcc -m32 -ffreestanding -fno-pie -fno-pic -c $< -o $@
+# Subsystem C files
+./build/%.o: ./subsystems/input/%.c
+	mkdir -p build
+	gcc $(CFLAGS) -c $< -o $@
 
-./objs/%.o: ./cpu/%.c
-	mkdir -p objs
-	gcc -m32 -ffreestanding -fno-pie -fno-pic -c $< -o $@
+./build/%.o: ./subsystems/tty/%.c
+	mkdir -p build
+	gcc $(CFLAGS) -c $< -o $@
 
-./objs/%.o: ./libc/%.c
-	mkdir -p objs
-	gcc -m32 -ffreestanding -fno-pie -fno-pic -c $< -o $@
+./build/%.o: ./subsystems/console/%.c
+	mkdir -p build
+	gcc $(CFLAGS) -c $< -o $@
+
+# Driver C files
+./build/%.o: ./drivers/block/ata/%.c
+	mkdir -p build
+	gcc $(CFLAGS) -c $< -o $@
+
+./build/%.o: ./drivers/input/keyboard/%.c
+	mkdir -p build
+	gcc $(CFLAGS) -c $< -o $@
+
+./build/%.o: ./drivers/video/vga/%.c
+	mkdir -p build
+	gcc $(CFLAGS) -c $< -o $@
+
+# Arch C files
+./build/%.o: ./arch/x86/cpu/%.c
+	mkdir -p build
+	gcc $(CFLAGS) -c $< -o $@
+
+./build/%.o: ./arch/x86/interrupts/%.c
+	mkdir -p build
+	gcc $(CFLAGS) -c $< -o $@
+
+./build/%.o: ./arch/x86/timer/%.c
+	mkdir -p build
+	gcc $(CFLAGS) -c $< -o $@
+
+# Lib C files
+./build/%.o: ./lib/%.c
+	mkdir -p build
+	gcc $(CFLAGS) -c $< -o $@
 
 # Build bootloader
 boot_sect_main.bin:
-	cd bootloader && nasm -f bin boot_sect_main.asm -o boot_sect_main.bin
+	cd arch/x86/boot && nasm -f bin boot_sect_main.asm -o boot_sect_main.bin
 
 run: 
-	qemu-system-x86_64 -drive format=raw,file=./bin/os-image.bin
+	qemu-system-x86_64 -drive format=raw,file=./build/os-image.bin
 
 write-test-sector: os-image
 	echo "HELLODISK" > test.bin
 	dd if=test.bin \
-	   of=./bin/os-image.bin \
+	   of=./build/os-image.bin \
 	   bs=512 seek=100 conv=notrunc
 
 clear:
-	rm -rf ./bin/* ./objs/* ./bootloader/*.bin test.bin
+	rm -rf ./build/* ./arch/x86/boot/*.bin test.bin
 
 .PHONY: all run clear write-test-sector

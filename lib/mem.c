@@ -1,5 +1,5 @@
 #include "mem.h"
-#include "../cpu/types.h"
+#include <arch/x86/cpu/types.h>
 
 void memory_copy(u8 *source, u8 *dest, int nbytes)
 {
