@@ -1,1 +1,1 @@
-# MeowOS
+# Minux (My + Linux = Minux)
