@@ -1,0 +1,45 @@
+#include "console.h"
+#include <kernel/log.h>
+
+#define CONSOLE_LOG "[CONSOLE]"
+
+static console_device_t* active_console = 0; 
+
+void console_register(console_device_t* dev){
+    active_console = dev; 
+    log_info(CONSOLE_LOG, "Console device registered");
+}
+
+console_device_t* console_get_active(){
+    return active_console;
+}
+
+// now implement the generic functions for the console api 
+void console_putc(char c){
+    // put the character on the active console 
+    if (!active_console) return; 
+
+    active_console->ops->putc(active_console, c);
+
+}
+
+void console_write(char* s){
+    int i = 0; 
+    while (s[i] != '\0'){
+        console_putc(s[i]);
+        i++;
+    }
+}
+
+
+void console_clear(){
+    if (!active_console) return; 
+
+    active_console->ops->clear(active_console); 
+}
+
+void console_set_cursor(u32 x, u32 y){
+    active_console->ops->set_cursor(active_console, x, y);
+}
+
+
